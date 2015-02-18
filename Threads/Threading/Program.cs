@@ -14,10 +14,10 @@ namespace Threading
             watch = new Stopwatch();
             random = new Random(555);
 
-            List<int> randomNumbers = GenerateRandomNumbers(random.Next(100000000, 120000000));
+            //List<int> randomNumbers = GenerateRandomNumbers(random.Next(100000000, 120000000));
 
-            StepZero(randomNumbers);
-            StepOne(randomNumbers);
+            //StepZero(randomNumbers);
+            StepOne(new List<int>());
 
             Console.Read();
         }
@@ -65,13 +65,16 @@ namespace Threading
             Console.WriteLine("Finding maximum value using StepOne setup...");
             watch.Start();
 
-            var maximumNumber = new StepOne.MaximumNumber(Environment.ProcessorCount,
-                                                          numbers.Count / Environment.ProcessorCount)
-                                                         .GetFrom(numbers);
+            var bla = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+            var maximumNumber = new StepOne.MaximumNumber(3,
+                                                          3);
+            int maximulValue = maximumNumber.GetFrom(bla);
+
             watch.Stop();
             Console.WriteLine("Finished finding maximum value in {0} miliseconds", watch.Elapsed.Milliseconds);
 
-            Console.WriteLine("Found maximum value is {0}", maximumNumber);
+            Console.WriteLine("Found maximum value is {0}", maximulValue);
         }
     }
 }

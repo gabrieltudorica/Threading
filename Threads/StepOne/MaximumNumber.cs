@@ -7,107 +7,137 @@ namespace StepOne
     {
         private readonly object locker = new object();
 
-        private readonly int maxThreadPoolSize;
+        private readonly int threadPoolSize;
         private readonly int partitionSize;
 
+        private static Queue<List<int>> inputPartitions;
         private static List<int> partitionsMaximumNumbers;
 
-        private WaitHandle[] waitHandles;
+        private AutoResetEvent[] taskCompleted;
+        private AutoResetEvent[] waitForTask;
+
         private Partitioner partitioner;
 
-        public MaximumNumber(int maxThreadPoolSize, int partitionSize)
+        public MaximumNumber(int threadPoolSize, int partitionSize)
         {
-            this.maxThreadPoolSize = maxThreadPoolSize;
+            this.threadPoolSize = threadPoolSize;
             this.partitionSize = partitionSize;
             partitionsMaximumNumbers = new List<int>();
+            inputPartitions = new Queue<List<int>>(threadPoolSize);
         }
 
         public int GetFrom(List<int> numbers)
         {
+            StartThreads();
+
             partitioner = new Partitioner(partitionSize, numbers);
 
-            while (partitioner.Partitions.Count != 0)
+            while (true)
             {
                 if (partitionsMaximumNumbers.Count == 1)
                 {
-                    return partitionsMaximumNumbers[0];
+                    ShutDownThreads();
+                    break;
                 }
 
-                SearchInParallelBatches(partitioner.GetPartitionBatches(maxThreadPoolSize));
+                StartWork();
 
                 if (partitioner.Partitions.Count == 0 && partitionsMaximumNumbers.Count > 1)
                 {
-                    RestartWithPartition(partitionsMaximumNumbers);
+                    partitioner = new Partitioner(partitionSize, partitionsMaximumNumbers);
+                    partitionsMaximumNumbers = new List<int>();
                 }
             }
 
             return partitionsMaximumNumbers[0];
         }
 
-        private void SearchInParallelBatches(List<List<int>> partitionBatches)
+        private void ShutDownThreads()
         {
-            waitHandles = GetWaitHandles(partitionBatches.Count);
-            StartThreadsFor(partitionBatches, waitHandles);
-            
-            WaitHandle.WaitAll(waitHandles);
-
-            foreach (WaitHandle waitHandle in waitHandles)
+            for (int i = 0; i < threadPoolSize; i++)
             {
-                waitHandle.Dispose();
+                inputPartitions.Enqueue(new List<int>());
+                waitForTask[i].Set();
             }
         }
 
-        private static WaitHandle[] GetWaitHandles(int count)
+        private void StartWork()
         {
-            var waitHandles = new WaitHandle[count];
-
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < threadPoolSize; i++)
             {
-                waitHandles[i] = new EventWaitHandle(false, EventResetMode.AutoReset);
+                AddNextPartition();
+                waitForTask[i].Set();
             }
 
-            return waitHandles;
+            WaitHandle.WaitAll(taskCompleted);
         }
 
-        private void StartThreadsFor(List<List<int>> partitionBatches, WaitHandle[] eventWaitHandles)
+        private void AddNextPartition()
         {
-            for (int index = 0; index < partitionBatches.Count; ++index)
+            if (partitioner.Partitions.Count == 0)
             {
-                int temp = index;
-                new Thread((() => FindMaximumValueInPartition(partitionBatches[temp], (EventWaitHandle)eventWaitHandles[temp]))).Start();
+                inputPartitions.Enqueue(new List<int>());
+                return;
+            }
+
+            inputPartitions.Enqueue(partitioner.Partitions.Dequeue());
+        }
+
+        private void StartThreads()
+        {
+            waitForTask = new AutoResetEvent[threadPoolSize];
+            taskCompleted = new AutoResetEvent[threadPoolSize];
+
+            for (int i = 0; i < threadPoolSize; i++)
+            {
+                int temp = i;
+                waitForTask[temp] = new AutoResetEvent(false);
+                taskCompleted[temp] = new AutoResetEvent(false);
+
+                var thread =
+                    new Thread(
+                        (() =>
+                            FindMaximumValueInPartition(waitForTask[temp], taskCompleted[temp])));
+                thread.Start();
             }
         }
 
-        private void FindMaximumValueInPartition(IEnumerable<int> partition, EventWaitHandle waitHandle)
+        private void FindMaximumValueInPartition(AutoResetEvent waitForTask, AutoResetEvent taskCompleted)
         {
             int maximumValue = int.MinValue;
 
-            foreach (int currentValue in partition)
+            while (true)
             {
-                if (currentValue > maximumValue)
+                waitForTask.WaitOne();
+
+                List<int> currentPartition = inputPartitions.Dequeue();
+
+                if (currentPartition.Count == 0)
                 {
-                    maximumValue = currentValue;
+                    taskCompleted.Set();
+                    return;
                 }
+
+                foreach (int value in currentPartition)
+                {
+                    if (value > maximumValue)
+                    {
+                        maximumValue = value;
+                    }
+                }
+
+                Monitor.Enter(locker);
+                try
+                {
+                    partitionsMaximumNumbers.Add(maximumValue);
+                }
+                finally
+                {
+                    Monitor.Exit(locker);
+                }
+
+                taskCompleted.Set();
             }
-
-            Monitor.Enter(locker);
-
-            try
-            {
-                partitionsMaximumNumbers.Add(maximumValue);
-            }
-            finally
-            {
-                Monitor.Exit(locker);
-            }
-
-            waitHandle.Set();
-        }
-
-        private void RestartWithPartition(List<int> partition)
-        {
-            partitioner = new Partitioner(partitionSize, partition);
-            partitionsMaximumNumbers = new List<int>();
         }
     }
 }

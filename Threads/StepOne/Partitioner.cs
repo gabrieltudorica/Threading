@@ -17,28 +17,6 @@ namespace StepOne
             Partitions = GetPartitions();
         }
 
-        public List<List<int>> GetPartitionBatches(int batchNumber)
-        {
-            if (Partitions.Count >= batchNumber)
-            {
-                return GetBatchOf(batchNumber);
-            }
-
-            return GetBatchOf(Partitions.Count);
-        }
-
-        private List<List<int>> GetBatchOf(int batchNumber)
-        {
-            var partitions = new List<List<int>>();
-
-            for (int i = 0; i < batchNumber; i++)
-            {
-                partitions.Add(Partitions.Dequeue());
-            }
-
-            return partitions;
-        }
-
         private Queue<List<int>> GetPartitions()
         {
             var partitions = new Queue<List<int>>();
@@ -60,7 +38,12 @@ namespace StepOne
             int lowerBound = partitionNumber * partitionSize;
             int higherBound = lowerBound + partitionSize;
 
-            for (int i = lowerBound; i < higherBound && i != initialCollection.Count; ++i)
+            if (higherBound > initialCollection.Count)
+            {
+                higherBound = lowerBound + (initialCollection.Count - lowerBound);
+            }
+
+            for (int i = lowerBound; i < higherBound; ++i)
             {
                 partition.Add(initialCollection[i]);
             }
