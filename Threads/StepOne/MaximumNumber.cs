@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace StepOne
@@ -63,24 +64,28 @@ namespace StepOne
 
         private void StartWork()
         {
+            var activeThreads = new List<AutoResetEvent>();
+
             for (int i = 0; i < threadPoolSize; i++)
             {
-                AddNextPartition();
-                waitForTask[i].Set();
+                if (partitioner.Partitions.Count > 0)
+                {
+                    Monitor.Enter(locker);
+                    try
+                    {
+                        inputPartitions.Enqueue(partitioner.Partitions.Dequeue());
+                    }
+                    finally
+                    {
+                        Monitor.Exit(locker);
+                    }
+
+                    activeThreads.Add(taskCompleted[i]);
+                    waitForTask[i].Set();
+                }                
             }
 
-            WaitHandle.WaitAll(taskCompleted);
-        }
-
-        private void AddNextPartition()
-        {
-            if (partitioner.Partitions.Count == 0)
-            {
-                inputPartitions.Enqueue(new List<int>());
-                return;
-            }
-
-            inputPartitions.Enqueue(partitioner.Partitions.Dequeue());
+            WaitHandle.WaitAll(activeThreads.ToArray());
         }
 
         private void StartThreads()
@@ -108,12 +113,24 @@ namespace StepOne
 
             while (true)
             {
+                //Console.WriteLine("Waiting for work");
                 waitForTask.WaitOne();
+                //Console.WriteLine("Started work");
+                List<int> currentPartition;
+                Monitor.Enter(locker);
+                try
+                {
+                    currentPartition = inputPartitions.Dequeue();
+                }
+                finally
+                {
+                    Monitor.Exit(locker);
+                }
 
-                List<int> currentPartition = inputPartitions.Dequeue();
 
                 if (currentPartition.Count == 0)
                 {
+                    //Console.WriteLine("count is zero, exiting thread");
                     taskCompleted.Set();
                     return;
                 }
@@ -126,6 +143,8 @@ namespace StepOne
                     }
                 }
 
+                //Console.WriteLine("found maximum value in partition " + maximumValue);
+
                 Monitor.Enter(locker);
                 try
                 {
@@ -136,6 +155,7 @@ namespace StepOne
                     Monitor.Exit(locker);
                 }
 
+                //Console.WriteLine("finished");
                 taskCompleted.Set();
             }
         }
