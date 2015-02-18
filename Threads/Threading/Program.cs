@@ -14,7 +14,7 @@ namespace Threading
             watch = new Stopwatch();
             random = new Random(555);
 
-            List<int> randomNumbers = GenerateRandomNumbers(random.Next(10000, 20000));
+            List<int> randomNumbers = GenerateRandomNumbers(random.Next(1000000, 2000000));
 
             //StepZero(randomNumbers);
             StepOne(randomNumbers);
@@ -67,7 +67,7 @@ namespace Threading
 
             var bla = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-            var maximumNumber = new StepOne.MaximumNumber(Environment.ProcessorCount,458);
+            var maximumNumber = new StepOne.MaximumNumber(Environment.ProcessorCount,4587);
             int maximulValue = maximumNumber.GetFrom(numbers);
 
             watch.Stop();

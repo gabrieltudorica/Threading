@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace StepOne
@@ -11,7 +10,7 @@ namespace StepOne
         private readonly int threadPoolSize;
         private readonly int partitionSize;
 
-        private static Queue<List<int>> inputPartitions;
+        private static Queue<List<int>> workingPartitions;
         private static List<int> partitionsMaximumNumbers;
 
         private AutoResetEvent[] taskCompleted;
@@ -24,7 +23,7 @@ namespace StepOne
             this.threadPoolSize = threadPoolSize;
             this.partitionSize = partitionSize;
             partitionsMaximumNumbers = new List<int>();
-            inputPartitions = new Queue<List<int>>(threadPoolSize);
+            workingPartitions = new Queue<List<int>>(threadPoolSize);
         }
 
         public int GetFrom(List<int> numbers)
@@ -57,7 +56,7 @@ namespace StepOne
         {
             for (int i = 0; i < threadPoolSize; i++)
             {
-                inputPartitions.Enqueue(new List<int>());
+                workingPartitions.Enqueue(new List<int>());
                 waitForTask[i].Set();
             }
         }
@@ -70,22 +69,26 @@ namespace StepOne
             {
                 if (partitioner.Partitions.Count > 0)
                 {
-                    Monitor.Enter(locker);
-                    try
-                    {
-                        inputPartitions.Enqueue(partitioner.Partitions.Dequeue());
-                    }
-                    finally
-                    {
-                        Monitor.Exit(locker);
-                    }
-
+                    AddPartition();
                     activeThreads.Add(taskCompleted[i]);
                     waitForTask[i].Set();
                 }                
             }
 
             WaitHandle.WaitAll(activeThreads.ToArray());
+        }
+
+        private void AddPartition()
+        {
+            Monitor.Enter(locker);
+            try
+            {
+                workingPartitions.Enqueue(partitioner.Partitions.Dequeue());
+            }
+            finally
+            {
+                Monitor.Exit(locker);
+            }
         }
 
         private void StartThreads()
@@ -116,18 +119,9 @@ namespace StepOne
                 //Console.WriteLine("Waiting for work");
                 waitForTask.WaitOne();
                 //Console.WriteLine("Started work");
-                List<int> currentPartition;
-                Monitor.Enter(locker);
-                try
-                {
-                    currentPartition = inputPartitions.Dequeue();
-                }
-                finally
-                {
-                    Monitor.Exit(locker);
-                }
 
 
+                List<int> currentPartition = GetNextPartition();
                 if (currentPartition.Count == 0)
                 {
                     //Console.WriteLine("count is zero, exiting thread");
@@ -143,20 +137,41 @@ namespace StepOne
                     }
                 }
 
-                //Console.WriteLine("found maximum value in partition " + maximumValue);
-
-                Monitor.Enter(locker);
-                try
-                {
-                    partitionsMaximumNumbers.Add(maximumValue);
-                }
-                finally
-                {
-                    Monitor.Exit(locker);
-                }
+                AddResult(maximumValue);
 
                 //Console.WriteLine("finished");
                 taskCompleted.Set();
+            }
+        }
+
+        private List<int> GetNextPartition()
+        {
+            List<int> currentPartition;
+
+            Monitor.Enter(locker);
+            try
+            {
+                currentPartition = workingPartitions.Dequeue();
+            }
+            finally
+            {
+                Monitor.Exit(locker);
+            }
+
+            return currentPartition;
+        }
+
+        private void AddResult(int maximumValue)
+        {
+            //Console.WriteLine("found maximum value in partition " + maximumValue);
+            Monitor.Enter(locker);
+            try
+            {
+                partitionsMaximumNumbers.Add(maximumValue);
+            }
+            finally
+            {
+                Monitor.Exit(locker);
             }
         }
     }
