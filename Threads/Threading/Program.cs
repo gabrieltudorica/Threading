@@ -67,7 +67,7 @@ namespace Threading
 
             var bla = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-            var maximumNumber = new StepOne.MaximumNumber(Environment.ProcessorCount,4587);
+            var maximumNumber = new StepOne.MaximumNumberTwo(3, 3598);
             int maximulValue = maximumNumber.GetFrom(numbers);
 
             watch.Stop();
