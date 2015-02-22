@@ -143,41 +143,6 @@ namespace StepOne
             }
         }
 
-
-        private void Test(AutoResetEvent waitForTask, AutoResetEvent taskCompleted)
-        {
-            int maximumValue = int.MinValue;
-
-            while (true)
-            {
-                //Console.WriteLine("Waiting for work");
-                waitForTask.WaitOne();
-                //Console.WriteLine("Started work");
-
-
-                List<int> currentPartition = GetNextPartition();
-                if (currentPartition.Count == 0)
-                {
-                    //Console.WriteLine("count is zero, exiting thread");
-                    taskCompleted.Set();
-                    return;
-                }
-
-                foreach (int value in currentPartition)
-                {
-                    if (value > maximumValue)
-                    {
-                        maximumValue = value;
-                    }
-                }
-
-                AddResult(maximumValue);
-
-                //Console.WriteLine("finished");
-                taskCompleted.Set();
-            }
-        }
-
         private List<int> GetNextPartition()
         {
             List<int> currentPartition;

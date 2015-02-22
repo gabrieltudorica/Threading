@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepOne", "StepOne\StepOne.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Threading", "Threading\Threading.csproj", "{DF99C544-3736-4441-A02C-F9DAB9577BF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepTwo", "StepTwo\StepTwo.csproj", "{DDFE9F31-BA0D-414C-ADF4-F9EAFF4DB850}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{DF99C544-3736-4441-A02C-F9DAB9577BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF99C544-3736-4441-A02C-F9DAB9577BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF99C544-3736-4441-A02C-F9DAB9577BF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDFE9F31-BA0D-414C-ADF4-F9EAFF4DB850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDFE9F31-BA0D-414C-ADF4-F9EAFF4DB850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDFE9F31-BA0D-414C-ADF4-F9EAFF4DB850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDFE9F31-BA0D-414C-ADF4-F9EAFF4DB850}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
