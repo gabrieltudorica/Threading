@@ -93,7 +93,7 @@ namespace StepTwo
                 if (currentPartition == null)
                 {
                     taskCompleted.Set();
-                    semaphore.Release();
+                    //semaphore.Release();
                     waitForTask.WaitOne();
                     continue;
                 }

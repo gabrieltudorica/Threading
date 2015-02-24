@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Threading
 {
@@ -19,7 +18,8 @@ namespace Threading
 
             StepZero(randomNumbers);
             //StepOne(randomNumbers);
-            StepTwo(randomNumbers);
+            //StepTwo(randomNumbers);
+            StepThree(randomNumbers);
 
             Console.Read();
         }
@@ -87,6 +87,23 @@ namespace Threading
             watch.Start();
 
             var maximumNumber = new StepTwo.MaximumNumber(8, 300);
+            int maximumValue = maximumNumber.GetFrom(numbers);
+
+            watch.Stop();
+            Console.WriteLine("Finished finding maximum value in {0} miliseconds", watch.Elapsed.Milliseconds);
+
+            Console.WriteLine("Found maximum value is {0}", maximumValue);
+        }
+
+        private static void StepThree(List<int> numbers)
+        {
+            watch.Reset();
+
+            Console.WriteLine();
+            Console.WriteLine("Finding maximum value using StepThree setup...");
+            watch.Start();
+
+            var maximumNumber = new StepThree.MaximumNumber(2, 500);
             int maximumValue = maximumNumber.GetFrom(numbers);
 
             watch.Stop();
