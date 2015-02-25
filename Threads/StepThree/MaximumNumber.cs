@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StepThree
@@ -21,6 +22,7 @@ namespace StepThree
         public int GetFrom(List<int> initialCollection)
         {
             CreateInitialCollection(initialCollection);
+            StartTasks();
 
             while (true)
             {
@@ -29,16 +31,7 @@ namespace StepThree
                     return GetNextElement();
                 }
 
-                var activeTasks = new List<Task>();
-
-                for (int i = 0; i < threadPoolSize; i++)
-                {
-                    Task task = GetTask();         
-                    activeTasks.Add(task);
-                    task.Start();
-                }
-
-                Task.WaitAll(activeTasks.ToArray());                
+                Thread.Sleep(1000);
             }
         }
 
@@ -50,19 +43,30 @@ namespace StepThree
             }
         }
 
-        private Task GetTask()
+        private void StartTasks()
         {
-            var task = new Task(() =>
+            for (int i = 0; i < threadPoolSize; i++)
             {
-                List<int> currentPartition = GetPartition();
-                
-                if (currentPartition.Count > 1)
-                {
-                    numbers.Enqueue(currentPartition.Max());
-                }
-            });
+                StartTask();
+            }   
+        }
 
-            return task;
+        private void StartTask()
+        {
+            if (numbers.Count > 1)
+            {
+                Task.Run(() => FindMaximum()).ContinueWith(t => StartTask());
+            }
+        }
+
+        private void FindMaximum()
+        {
+            List<int> currentPartition = GetPartition();
+
+            if (currentPartition.Count > 1)
+            {
+                numbers.Enqueue(currentPartition.Max());
+            }
         }
 
         private List<int> GetPartition()
