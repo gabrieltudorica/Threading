@@ -19,7 +19,8 @@ namespace Threading
             StepZero(randomNumbers);
             //StepOne(randomNumbers);
             //StepTwo(randomNumbers);
-            StepThree(randomNumbers);
+            //StepThree(randomNumbers);
+            StepFive(randomNumbers);
 
             Console.Read();
         }
@@ -104,6 +105,23 @@ namespace Threading
             watch.Start();
 
             var maximumNumber = new StepThree.MaximumNumber(2, 500);
+            int maximumValue = maximumNumber.GetFrom(numbers);
+
+            watch.Stop();
+            Console.WriteLine("Finished finding maximum value in {0} miliseconds", watch.Elapsed.Milliseconds);
+
+            Console.WriteLine("Found maximum value is {0}", maximumValue);
+        }
+
+        private static void StepFive(List<int> numbers)
+        {
+            watch.Reset();
+
+            Console.WriteLine();
+            Console.WriteLine("Finding maximum value using StepFive setup...");
+            watch.Start();
+
+            var maximumNumber = new StepFive.MaximumNumber(2, 500);
             int maximumValue = maximumNumber.GetFrom(numbers);
 
             watch.Stop();

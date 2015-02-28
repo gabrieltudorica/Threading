@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepTwo", "StepTwo\StepTwo.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepThree", "StepThree\StepThree.csproj", "{5508E4E1-B91E-4CB3-A647-6AAB25E06A14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StepFive", "StepFive\StepFive.csproj", "{5FC7EC05-595C-49F8-921F-5499C29A1144}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{5508E4E1-B91E-4CB3-A647-6AAB25E06A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5508E4E1-B91E-4CB3-A647-6AAB25E06A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5508E4E1-B91E-4CB3-A647-6AAB25E06A14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC7EC05-595C-49F8-921F-5499C29A1144}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC7EC05-595C-49F8-921F-5499C29A1144}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC7EC05-595C-49F8-921F-5499C29A1144}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC7EC05-595C-49F8-921F-5499C29A1144}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
