@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DF99C544-3736-4441-A02C-F9DAB9577BF4}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{F9578D09-5472-4E90-BA6B-6238E16EE558}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Threading</RootNamespace>
-    <AssemblyName>Threading</AssemblyName>
+    <RootNamespace>StepFour</RootNamespace>
+    <AssemblyName>StepFour</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,37 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="MaximumNumber.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\StepFive\StepFive.csproj">
-      <Project>{5fc7ec05-595c-49f8-921f-5499c29a1144}</Project>
-      <Name>StepFive</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StepFour\StepFour.csproj">
-      <Project>{f9578d09-5472-4e90-ba6b-6238e16ee558}</Project>
-      <Name>StepFour</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StepOne\StepOne.csproj">
-      <Project>{8ce1d5ca-a6ad-4338-8492-39fb31fbde6b}</Project>
-      <Name>StepOne</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StepThree\StepThree.csproj">
-      <Project>{5508e4e1-b91e-4cb3-a647-6aab25e06a14}</Project>
-      <Name>StepThree</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StepTwo\StepTwo.csproj">
-      <Project>{ddfe9f31-ba0d-414c-adf4-f9eaff4db850}</Project>
-      <Name>StepTwo</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StepZero\StepZero.csproj">
-      <Project>{8201b9ea-d142-4358-b5c1-7d65239f8384}</Project>
-      <Name>StepZero</Name>
-    </ProjectReference>
+    <Compile Include="TaskWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
