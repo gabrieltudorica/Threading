@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace StepFour
 {
@@ -12,7 +12,7 @@ namespace StepFour
         private readonly int threadPoolSize;
         private readonly int partitionSize;
 
-        private readonly List<TaskWrapper> activeTasks;
+        private readonly List<Task<int>> activeTasks;
         private readonly ConcurrentQueue<List<int>> partitions;
         private ConcurrentQueue<int> results;
 
@@ -21,7 +21,7 @@ namespace StepFour
             this.threadPoolSize = threadPoolSize;
             this.partitionSize = partitionSize;
 
-            activeTasks = new List<TaskWrapper>();
+            activeTasks = new List<Task<int>>();
             partitions = new ConcurrentQueue<List<int>>();
             results = new ConcurrentQueue<int>();
 
@@ -30,22 +30,40 @@ namespace StepFour
         public int GetFrom(List<int> initialCollection)
         {
             CreatePartitions(initialCollection);
+            CreateTasks();
+            StartTasks();
 
             while (true)
             {
-                CreateTasks();
-                StartTasks();                
-                WaitForTasks();
-                CollectResults();
-                activeTasks.Clear();
+                int index = Task.WaitAny(activeTasks.ToArray());
+                var task = activeTasks[index];
+                var result = task.Result;
+                if(result != 0)
+                {
+                    results.Enqueue(task.Result);
+                }                
 
-                if (results.Count == 1)
+                if(partitions.Count > 0)
+                {
+                    activeTasks.Remove(task);
+                    task = GetTask();
+                    activeTasks.Add(task);
+                    task.Start();
+                }
+                else
+                {
+                    activeTasks.Remove(task);
+                }
+
+                if (activeTasks.Count == 0 && results.Count == 1)
                 {
                     return GetNextElement();
                 }
 
-                CreatePartitions(results.ToList());
-                results = new ConcurrentQueue<int>();
+                if (activeTasks.Count == 0)
+                {                    
+                    RestartWithParition(results.ToList());
+                }
             }
         }
 
@@ -75,48 +93,44 @@ namespace StepFour
         {
             for (int i = 0; i < threadPoolSize; i++)
             {
-                var task = new TaskWrapper(partitions);
-                activeTasks.Add(task);
+                activeTasks.Add(GetTask());
             }
+        }
+
+        private Task<int> GetTask()
+        {
+            return new Task<int>(FindMaximum);
+        }
+
+        private int FindMaximum()
+        {
+            List<int> partition = GetNextPartition();
+
+            if (partition.Count > 0)
+            {
+               return partition.Max();
+            }
+
+            return 0;
+        }
+
+        private List<int> GetNextPartition()
+        {
+            List<int> partition;
+            if (!partitions.TryDequeue(out partition))
+            {
+                partition = new List<int>();
+            }
+
+            return partition;
         }
 
         private void StartTasks()
         {
-            foreach (TaskWrapper taskWrapper in activeTasks)
+            foreach (Task<int> task in activeTasks)
             {
-                taskWrapper.Start();
+                task.Start();
             }
-        }
-
-        private void WaitForTasks()
-        {
-            bool allTasksFinished = false;
-
-            while (!allTasksFinished)
-            {
-                allTasksFinished = true;
-                
-                foreach (TaskWrapper taskWrapper in activeTasks)
-                {
-                    allTasksFinished &= taskWrapper.Finished;
-                }
-            }
-        }
-
-        private void CollectResults()
-        {
-            foreach (TaskWrapper taskWrapper in activeTasks)
-            {
-                AddTaskResults(taskWrapper.GetResults());
-            }
-        }
-
-        private void AddTaskResults(IEnumerable<int> taskResults)
-        {
-            foreach (int result in taskResults)
-            {
-                results.Enqueue(result); 
-            }            
         }
 
         private int GetNextElement()
@@ -125,6 +139,15 @@ namespace StepFour
             results.TryDequeue(out currentValue);
 
             return currentValue;
+        }
+
+        private void  RestartWithParition(List<int> partition)
+        {
+            CreatePartitions(partition);
+            results = new ConcurrentQueue<int>();
+            
+            CreateTasks();
+            StartTasks();
         }
     }
 }
