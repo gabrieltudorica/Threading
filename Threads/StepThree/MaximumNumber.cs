@@ -24,6 +24,7 @@ namespace StepThree
             CreateInitialCollection(initialCollection);
             StartTasks();
 
+            //todo: remove while
             while (true)
             {
                 if (numbers.Count == 1)
